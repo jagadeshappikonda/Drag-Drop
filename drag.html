@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Drag and Drop files</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+    }
+
+    #dropArea {
+        width: 300px;
+        height: 200px;
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    #dropArea.drag {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    #fileList {
+        list-style-type: none;
+        padding: 0;
+        width: 20%;
+    }
+
+    #fileList li {
+        margin: 5px 0;
+    }
+</style>
+</head>
+<body>
+    <div id = "dropArea">
+        <p>Drop files here</p>
+    </div>
+    <ul id = "fileList"></ul>
+    <script>
+        let dropArea = document.getElementById("dropArea");
+        let fileList = document.getElementById("fileList");
+        ['dragover', 'drop'].forEach(event =>{
+            dropArea.addEventListener(event, preventDefault);
+            document.body.addEventListener(event, preventDefault);
+        });
+
+        function preventDefault(eventObject) {
+            eventObject.preventDefault();
+            eventObject.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight);
+        });
+
+        function highlight() {
+            dropArea.classList.add('drag');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('drag');
+        }
+
+        dropArea.addEventListener('drop', handleDrop);
+
+        function handleDrop(eventObject)
+        {
+            let data = eventObject.dataTransfer;
+            let files = data.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files)
+        {
+            // console.log(files[0].name);
+            // let listItem = document.createElement("li");
+            // listItem.textContent = files[0].name;
+            // fileList.appendChild(listItem);
+
+            let reader = new FileReader();
+            let listItem = document.createElement('li');
+
+            reader.onload = function(event) {
+                if(files[0].type.startsWith('image/'))
+                {
+                    let image = document.createElement("img");
+                    image.src = event.target.results;
+                    image.style.maxWidth = '100%';
+                    listItem.appendChild(image);
+                }
+                else
+                {
+                    listItem.textContent = files[0].name + ': ' + event.target.result;
+                }
+
+                fileList.appendChild(listItem);
+                // let fileContent = event.target.result;
+                // listItem.textContent = files[0].name + ': ' + fileContent;
+                // fileList.appendChild(listItem);
+            };
+
+            reader.readAsText(files[0]);
+        }
+
+         
+    </script>
+</body>
+</html>
